@@ -1,0 +1,95 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(120deg, #6c5ce7, #00cec9); 
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: #333;
+    overflow: hidden;
+  }
+
+
+  .upload-box {
+    background: #fff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(69, 69, 73, 0.1);
+    width: 100%;
+    max-width: 450px;
+    text-align: center;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    animation: fadeIn 1s ease-out;
+  }
+
+  
+  .upload-box:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    transform: translateY(-5px);
+  }
+
+  @keyframes fadeIn {
+    0% { opacity: 0; transform: scale(0.9); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  
+  h2 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #2d3436;
+    font-weight: 600;
+  }
+
+  
+  input[type="file"] {
+    margin: 20px 0;
+    padding: 12px;
+    background-color: #f8f8f8;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    width: 100%;
+    font-size: 16px;
+    color: #555;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+  }
+
+  
+  input[type="file"]:hover {
+    border-color: #6a7c7c;
+    background-color: #575f63;
+  }
+
+  
+  button {
+    background-color: #00cec9;
+    color: white;
+    padding: 14px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+
+  
+  button:hover {
+    background-color: #6c5ce7;
+    transform: translateY(-3px);
+  }
+
+  
+  button:active {
+    background-color: #34495e;
+    transform: translateY(1px);
+  }
+
+  
+  .file-info {
+    font-size: 14px;
+    color: #7f8c8d;
+    margin-top: 10px;
+  }

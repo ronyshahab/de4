@@ -1,0 +1,25 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Photo</title>
+  <link rel="stylesheet" href="../css/index.css">
+</head>
+<body>
+
+  <div class="upload-box">
+    <h2>Upload Your Photo</h2>
+    <form enctype="multipart/form-data" id="uploadForm">
+      <input type="file" name="photo" id="imageInput" accept="image/*" required>
+      <p class="file-info">Only image files are allowed (JPG, PNG, JPEG , HEIC ,DNG)</p>
+      <button type="submit">Upload</button>
+    </form>
+    <button id="startBtn">Start</button>
+    <button id="stopBtn">Stop</button>
+  </div>
+
+  <script type="module" src="../js/script.js"></script>
+</body>
+</html>
