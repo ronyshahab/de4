@@ -3,15 +3,49 @@ import threading
 import cv2
 from deepface import DeepFace
 
-uploadsDir= "./uploads"
+uploadsDir = "./uploads"
 isRunning = False
-model_name = "Facenet"
+model_name = "VGG-Face"
 model = DeepFace.build_model(model_name)
 detector_backend = "opencv"
+face_match = False
+lock = threading.Lock()
+verify_thread = None
 
+def analyze_face(frame):
+    try:
+        result = DeepFace.analyze(frame, actions=["age", "gender"], enforce_detection=False)
+        return True  
+    except Exception as e:
+        print(f"Face detection failed: {e}")
+        return False 
+
+def verify_faces_thread(frame, reference_images):
+    global face_match
+
+    if not analyze_face(frame):  
+        return
+    for ref in reference_images:
+        try:
+            result = DeepFace.verify(
+                frame,
+                ref,
+                model_name=model_name,
+                detector_backend=detector_backend,
+                enforce_detection=False
+            )
+            if result["verified"]:
+                with lock:
+                    face_match = True
+                print("face found")
+                break
+        except Exception as e:
+            print("Verification error:", e)
+            cv2.imshow("Bad Frame", frame)
+            cv2.waitKey(1)
 
 def face_verify():
-    global isRunning
+    global isRunning, face_match, verify_thread
     if isRunning:
         print("Face verification already running.")
         return
@@ -23,63 +57,53 @@ def face_verify():
         print("No images found in uploads/")
         isRunning = False
         return
-    
-    reference_images = [cv2.imread(os.path.join(uploadsDir, img)) for img in image_files]
 
-    reference_images = [img for img in reference_images if img is not None]
+    reference_images = []
+    for img_file in image_files:
+        img_path = os.path.join(uploadsDir, img_file)
+        img = cv2.imread(img_path)
+        if img is not None:
+            reference_images.append(img)
 
     if not reference_images:
         print("No valid images loaded.")
         isRunning = False
         return
-    
+
     cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
     counter = 0
-    face_match = False
 
-    def check_face(frame):
-        nonlocal face_match
-        for ref in reference_images:
-            try:
-                result = DeepFace.verify(
-                    frame,
-                    ref.copy(),
-                    model_name=model_name,
-                    model=model,
-                    detector_backend=detector_backend,
-                    enforce_detection=False
-                )
-                if result["verified"]:
-                    face_match = True
-                    break
-            except:
-                continue
     while isRunning:
         ret, frame = cap.read()
+        if not ret:
+            continue
 
-        if ret:
-            if counter % 30 == 0:
-                threading.Thread(target=check_face, args=(frame.copy(),)).start()
-            counter += 1
+        if counter % 30 == 0:
+            if verify_thread is None or not verify_thread.is_alive():
+                face_match = False
+                verify_thread = threading.Thread(target=verify_faces_thread, args=(frame.copy(), reference_images))
+                verify_thread.start()
 
-            text = "MATCH!" if face_match else "NO MATCH!"
-            color = (0, 255, 0) if face_match else (0, 0, 255)
-            cv2.putText(frame, text, (20, 450), cv2.FONT_HERSHEY_COMPLEX, 2, color, 3)
-
-            cv2.imshow("video", frame)
+        text = "MATCH!" if face_match else "NO MATCH!"
+        color = (0, 255, 0) if face_match else (0, 0, 255)
+        cv2.putText(frame, text, (20, 450), cv2.FONT_HERSHEY_COMPLEX, 2, color, 3)
+        cv2.imshow("video", frame)
 
         key = cv2.waitKey(1)
         if key == ord("q"):
+            print("Exiting...")
             break
+
+        counter += 1
 
     cap.release()
     cv2.destroyAllWindows()
-    isRunning=False
+    isRunning = False
 
 def stop_verification():
-    global verification_running
-    verification_running = False
+    global isRunning
+    isRunning = False
     print("Verification stopped.")
